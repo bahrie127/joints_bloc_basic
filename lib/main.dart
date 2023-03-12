@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:joints_bloc_basic_stream_controller/counter_bloc.dart';
 
 void main() {
@@ -10,12 +11,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return BlocProvider(
+      create: (context) => CounterBloc(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const MyHome(),
       ),
-      home: const MyHome(),
     );
   }
 }
@@ -28,11 +32,8 @@ class MyHome extends StatefulWidget {
 }
 
 class _MyHomeState extends State<MyHome> {
-  CounterBloc bloc = CounterBloc();
-
   @override
   void dispose() {
-    bloc.dispose();
     super.dispose();
   }
 
@@ -44,17 +45,16 @@ class _MyHomeState extends State<MyHome> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          StreamBuilder<Object>(
-              stream: bloc.stateStream,
-              initialData: 0,
-              builder: (context, snapshot) {
-                return Text(
-                  '${snapshot.data}',
-                  style: TextStyle(
-                    fontSize: 24,
-                  ),
-                );
-              }),
+          BlocBuilder<CounterBloc, int>(
+            builder: (context, state) {
+              return Text(
+                '$state',
+                style: const TextStyle(
+                  fontSize: 24,
+                ),
+              );
+            },
+          ),
           const SizedBox(
             height: 8,
           ),
@@ -63,7 +63,7 @@ class _MyHomeState extends State<MyHome> {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    bloc.eventSink.add(DecrementEvent());
+                    context.read<CounterBloc>().add(DecrementEvent());
                   },
                   child: const Text('Decrement')),
               const SizedBox(
@@ -71,7 +71,7 @@ class _MyHomeState extends State<MyHome> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    bloc.eventSink.add(IncrementEvent());
+                    context.read<CounterBloc>().add(IncrementEvent());
                   },
                   child: const Text('Increment'))
             ],
